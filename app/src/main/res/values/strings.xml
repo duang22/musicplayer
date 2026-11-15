@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">MusicPlayer</string>
+    <string name="player_heading">我的音乐播放器</string>
+    <string name="sample_title">测试音频</string>
+    <string name="not_connected">尚未连接</string>
+    <string name="play">播放</string>
+    <string name="reconnect">重新连接</string>
+    <string name="audio_permission_unknown">正在检查音频权限</string>
+    <string name="scan_songs">扫描手机歌曲</string>
+    <string name="open_settings">权限设置</string>
+    <string name="song_count">已保存的歌曲：%1$d 首</string>
+    <string name="previous">上一首</string>
+    <string name="next">下一首</string>
+    <string name="play_mode_order">顺序循环</string>
+    <string name="play_mode_shuffle">随机循环</string>
+    <string name="play_mode_repeat_one">单曲循环</string>
+</resources>
