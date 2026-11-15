@@ -14,7 +14,7 @@ import com.example.musicplayer.data.SongEntity
 import com.example.musicplayer.data.SongRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-
+import com.example.musicplayer.playback.PlaybackProgress
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val connection = PlaybackConnection(application)
@@ -23,7 +23,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _isScanning = MutableLiveData(false)
     val isScanning: LiveData<Boolean> = _isScanning
-
+    val playbackProgress: LiveData<PlaybackProgress> = connection.progress
     private val _scanStatus = MutableLiveData("点击扫描手机歌曲")
     val scanStatus: LiveData<String> = _scanStatus
     val playbackState: LiveData<PlaybackUiState> = connection.state
@@ -74,7 +74,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
 
     fun playSong(song: SongEntity) {
-        val currentSongs = songs.value.orEmpty()
+        playSongsFromList(songs.value.orEmpty(), song)
+    }
+
+    fun playSongsFromList(currentSongs: List<SongEntity>, song: SongEntity) {
         val startIndex = currentSongs.indexOfFirst { it.contentUri == song.contentUri }
         if (startIndex == -1) return
 
@@ -105,5 +108,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         connection.disconnect()
         super.onCleared()
+    }
+    fun seekTo(positionMs: Long) {
+        connection.seekTo(positionMs)
     }
 }

@@ -17,11 +17,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.musicplayer.data.AudioPermission
 import com.example.musicplayer.playback.PlaybackMode
-
+import android.widget.SeekBar
+import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
+    private var isUserSeeking = false
     private val viewModel: MainViewModel by lazy {
         ViewModelProvider(this)[MainViewModel::class.java]
     }
@@ -80,6 +81,9 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerSongs.adapter = songAdapter
 
         binding.buttonScan.setOnClickListener { requestAudioAndScan() }
+        binding.buttonPlaylists.setOnClickListener {
+            startActivity(Intent(this, PlaylistActivity::class.java))
+        }
         binding.buttonAudioSettings.setOnClickListener {
             val intent = Intent(
                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
@@ -98,6 +102,22 @@ class MainActivity : AppCompatActivity() {
         viewModel.isScanning.observe(this) { scanning ->
             binding.buttonScan.isEnabled = !scanning
         }
+        viewModel.playbackProgress.observe(this) { progress ->
+            val duration = progress.durationMs
+            val position = progress.positionMs
+            binding.textDuration.text = formatTime(duration)
+
+            if (!isUserSeeking) {
+                binding.textCurrentPosition.text = formatTime(position)
+                binding.seekBarProgress.progress = if (duration > 0L) {
+                    (position * 1000L / duration).toInt().coerceIn(0, 1000)
+                } else {
+                    0
+                }
+            }
+            binding.seekBarProgress.isEnabled =
+                duration > 0L && viewModel.playbackState.value?.isConnected == true
+        }//观察播放器的进度数据，并用它更新页面上的时间和进度条。
         viewModel.playbackState.observe(this) { state ->
             binding.textTitle.text = state.title
             binding.textStatus.text = state.statusText
@@ -117,7 +137,36 @@ class MainActivity : AppCompatActivity() {
                 PlaybackMode.SHUFFLE -> getString(R.string.play_mode_shuffle)
                 PlaybackMode.REPEAT_ONE -> getString(R.string.play_mode_repeat_one)
             }
+            binding.seekBarProgress.isEnabled =
+                state.isConnected && (viewModel.playbackProgress.value?.durationMs ?: 0L) > 0L
         }
+        binding.seekBarProgress.setOnSeekBarChangeListener(
+            //进度条注册监听器
+            object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    if (!fromUser) return//由系统引起
+                    val duration = viewModel.playbackProgress.value?.durationMs ?: 0L
+                    if (duration <= 0L) return
+                    val targetPosition = duration * progress / 1000L
+                    binding.textCurrentPosition.text = formatTime(targetPosition)
+                }//进度条变化
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                    isUserSeeking = true
+                }//开始拖动
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    isUserSeeking = false
+                    val bar = seekBar ?: return
+                    val duration = viewModel.playbackProgress.value?.durationMs ?: 0L
+                    if (duration > 0L) {
+                        val targetPosition = duration * bar.progress / 1000L
+                        viewModel.seekTo(targetPosition)
+                        binding.textCurrentPosition.text = formatTime(targetPosition)
+                    }//松手
+                }
+            }
+        )
     }
 
     override fun onStart() {
@@ -159,4 +208,16 @@ class MainActivity : AppCompatActivity() {
         }
         binding.buttonAudioSettings.isVisible = !granted
     }
+    private fun formatTime(positionMs: Long): String {
+        val totalSeconds = positionMs.coerceAtLeast(0L) / 1000L
+        val hours = totalSeconds / 3600L
+        val minutes = (totalSeconds % 3600L) / 60L
+        val seconds = totalSeconds % 60L
+        return if (hours > 0L) {
+            String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format(Locale.getDefault(), "%d:%02d", minutes, seconds)
+        }
+    }
+
 }

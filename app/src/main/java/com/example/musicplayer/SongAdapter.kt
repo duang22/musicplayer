@@ -11,6 +11,7 @@ import com.example.musicplayer.data.SongEntity
 import com.example.musicplayer.databinding.ItemSongBinding
 
 class SongAdapter(
+    private val onSongLongClick: ((SongEntity) -> Unit)? = null,
     private val onSongClick: (SongEntity) -> Unit
 ) : ListAdapter<SongEntity, SongAdapter.SongViewHolder>(SongDiff) {
 
@@ -28,6 +29,15 @@ class SongAdapter(
         holder.binding.textSongTitle.text = song.title
         holder.binding.textSongArtist.text = song.artist
         holder.itemView.setOnClickListener { onSongClick(song) }
+        holder.itemView.setOnLongClickListener {
+            val callback = onSongLongClick
+            if (callback == null) {
+                false
+            } else {
+                callback(song)
+                true
+            }
+        }
     }
 
     private object SongDiff : DiffUtil.ItemCallback<SongEntity>() {

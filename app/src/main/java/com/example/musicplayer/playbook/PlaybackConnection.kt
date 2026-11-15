@@ -96,6 +96,7 @@ class PlaybackConnection(context: Context) {
                     connectedController.addListener(playerListener)
                     //注册监听器回调代码
                     publishState()
+                    publishProgress() // 连接成功时先读取一次当前位置和总时长
                     if (connectedController.isPlaying) {
                         startProgressUpdates()
                     }
@@ -160,6 +161,7 @@ class PlaybackConnection(context: Context) {
         val oldFuture = controllerFuture
         controllerFuture = null
         //把变量清空
+        _progress.value = PlaybackProgress()
 
         controller?.removeListener(playerListener)
         controller = null

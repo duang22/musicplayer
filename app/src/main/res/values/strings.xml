@@ -14,4 +14,14 @@
     <string name="play_mode_order">顺序循环</string>
     <string name="play_mode_shuffle">随机循环</string>
     <string name="play_mode_repeat_one">单曲循环</string>
+    <string name="playlists">歌单</string>
+    <string name="playlist_title">我的歌单</string>
+    <string name="playlist_create">新建</string>
+    <string name="playlist_rename">重命名</string>
+    <string name="playlist_delete">删除</string>
+    <string name="playlist_select_hint">请选择一个歌单</string>
+    <string name="playlist_selected">当前歌单：%1$s</string>
+    <string name="playlist_add_songs">添加歌曲</string>
+    <string name="playlist_songs_hint">点击播放；长按可从歌单移除</string>
+
 </resources>
