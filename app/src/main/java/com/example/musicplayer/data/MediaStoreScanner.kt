@@ -15,7 +15,8 @@ class MediaStoreScanner(context: Context) {
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.DURATION
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.DATE_MODIFIED
         )
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
         val songs = mutableListOf<SongEntity>()
@@ -33,6 +34,7 @@ class MediaStoreScanner(context: Context) {
             val titleColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val artistColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
             val durationColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
+            val modifiedColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
 
             while (it.moveToNext()) {
                 val id = it.getLong(idColumn)
@@ -49,7 +51,8 @@ class MediaStoreScanner(context: Context) {
                         } else {
                             artist
                         },
-                        durationMs = it.getLong(durationColumn)
+                        durationMs = it.getLong(durationColumn),
+                        dateModifiedSeconds = it.getLong(modifiedColumn)
                     )
                 )
             }

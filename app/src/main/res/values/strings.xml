@@ -23,5 +23,10 @@
     <string name="playlist_selected">当前歌单：%1$s</string>
     <string name="playlist_add_songs">添加歌曲</string>
     <string name="playlist_songs_hint">点击播放；长按可从歌单移除</string>
+    <string name="recent_title">最近播放</string>
+    <string name="recent_hint">点击歌曲，从最近播放列表建立队列</string>
+    <string name="recent_clear">清空播放记录</string>
+    <string name="recent_empty">还没有最近播放的手机歌曲</string>
+    <string name="current_song_cover">当前歌曲封面</string>
 
 </resources>

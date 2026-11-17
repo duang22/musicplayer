@@ -1,6 +1,7 @@
 package com.example.musicplayer
 
 import android.app.Application
+import android.os.Bundle
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.media3.common.MediaItem
@@ -11,6 +12,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.musicplayer.data.SongEntity
+import com.example.musicplayer.artwork.EXTRA_ARTWORK_MODIFIED
 import com.example.musicplayer.data.SongRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -89,6 +91,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     MediaMetadata.Builder()
                         .setTitle(songItem.title)
                         .setArtist(songItem.artist)
+                        .setExtras(Bundle().apply {
+                            putLong(EXTRA_ARTWORK_MODIFIED, songItem.dateModifiedSeconds)
+                        })
                         .build()
                 )
                 .build()

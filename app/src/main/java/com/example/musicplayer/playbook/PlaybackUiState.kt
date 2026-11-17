@@ -3,6 +3,7 @@ package com.example.musicplayer.playback
 data class PlaybackUiState(
     val isConnecting: Boolean = false,
     val isConnected: Boolean = false,
+    val currentMediaId: String? = null,
     val title: String = "测试音频",
     val statusText: String = "尚未连接",
     val playButtonText: String = "播放",

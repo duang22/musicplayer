@@ -16,6 +16,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.musicplayer.data.AudioPermission
+import com.example.musicplayer.artwork.ArtworkLoader
+import com.example.musicplayer.artwork.SongArtwork
 import com.example.musicplayer.playback.PlaybackMode
 import android.widget.SeekBar
 import java.util.Locale
@@ -23,6 +25,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var isUserSeeking = false
+    private var currentArtwork: SongArtwork? = null
+    private var artworkInitialized = false
     private val viewModel: MainViewModel by lazy {
         ViewModelProvider(this)[MainViewModel::class.java]
     }
@@ -84,6 +88,9 @@ class MainActivity : AppCompatActivity() {
         binding.buttonPlaylists.setOnClickListener {
             startActivity(Intent(this, PlaylistActivity::class.java))
         }
+        binding.buttonRecentPlay.setOnClickListener {
+            startActivity(Intent(this, RecentPlayActivity::class.java))
+        }
         binding.buttonAudioSettings.setOnClickListener {
             val intent = Intent(
                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
@@ -95,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.songs.observe(this) { songs ->
             songAdapter.submitList(songs)
             binding.textSongCount.text = getString(R.string.song_count, songs.size)
+            updateCurrentArtwork()
         }
         viewModel.scanStatus.observe(this) { status ->
             binding.textScanStatus.text = status
@@ -121,6 +129,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.playbackState.observe(this) { state ->
             binding.textTitle.text = state.title
             binding.textStatus.text = state.statusText
+            updateCurrentArtwork()
             binding.buttonPrevious.isEnabled = state.isConnected && state.hasMediaItems
             binding.buttonNext.isEnabled = state.isConnected && state.hasMediaItems
             binding.buttonPlayPause.isEnabled = state.isConnected
@@ -173,6 +182,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         viewModel.connect()
         updateAudioPermissionUi()
+        updateCurrentArtwork()
     }
 
     override fun onStop() {
@@ -208,6 +218,22 @@ class MainActivity : AppCompatActivity() {
         }
         binding.buttonAudioSettings.isVisible = !granted
     }
+    private fun updateCurrentArtwork() {
+        val mediaId = viewModel.playbackState.value?.currentMediaId
+        val uri = mediaId?.let(Uri::parse)
+        val song = viewModel.songs.value.orEmpty().firstOrNull { it.contentUri == mediaId }
+        val artwork = if (mediaId != null && AudioPermission.hasAccess(this) && uri?.scheme == "content") {
+            SongArtwork(mediaId, song?.dateModifiedSeconds ?: 0L)
+        } else {
+            null
+        }
+        if (!artworkInitialized || currentArtwork != artwork) {
+            artworkInitialized = true
+            currentArtwork = artwork
+            ArtworkLoader.load(binding.imageCurrentCover, artwork)
+        }
+    }
+
     private fun formatTime(positionMs: Long): String {
         val totalSeconds = positionMs.coerceAtLeast(0L) / 1000L
         val hours = totalSeconds / 3600L

@@ -72,4 +72,5 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

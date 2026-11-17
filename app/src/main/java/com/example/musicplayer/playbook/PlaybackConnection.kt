@@ -200,6 +200,7 @@ class PlaybackConnection(context: Context) {
 
         _state.value = PlaybackUiState(
             isConnected = true,
+            currentMediaId = current.currentMediaItem?.mediaId,
             title = current.mediaMetadata.title?.toString() ?: "测试音频",
             statusText = status,
             playButtonText = buttonText,

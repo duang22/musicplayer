@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.data.SongEntity
+import com.example.musicplayer.artwork.ArtworkLoader
+import com.example.musicplayer.artwork.SongArtwork
 import com.example.musicplayer.databinding.ItemSongBinding
 
 class SongAdapter(
@@ -28,6 +30,10 @@ class SongAdapter(
         val song = getItem(position)
         holder.binding.textSongTitle.text = song.title
         holder.binding.textSongArtist.text = song.artist
+        ArtworkLoader.load(
+            holder.binding.imageSongCover,
+            SongArtwork(song.contentUri, song.dateModifiedSeconds)
+        )
         holder.itemView.setOnClickListener { onSongClick(song) }
         holder.itemView.setOnLongClickListener {
             val callback = onSongLongClick
@@ -38,6 +44,11 @@ class SongAdapter(
                 true
             }
         }
+    }
+
+    override fun onViewRecycled(holder: SongViewHolder) {
+        ArtworkLoader.clear(holder.binding.imageSongCover)
+        super.onViewRecycled(holder)
     }
 
     private object SongDiff : DiffUtil.ItemCallback<SongEntity>() {
